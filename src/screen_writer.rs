@@ -17,13 +17,13 @@ pub struct ScreenWriter<DI, DS: DisplaySize> {
 #[derive(Error, Debug)]
 pub enum ScreenWriterError {
     #[error("Display initialization error: {:?}", _0)]
-    DisplayInitError(DisplayError),
+    InitError(DisplayError),
     #[error("Error clearing display: {:?}", _0)]
-    DisplayClearError(DisplayError),
+    ClearError(DisplayError),
     #[error("Error flushing display: {:?}", _0)]
-    DisplayFlushError(DisplayError),
+    FlushError(DisplayError),
     #[error("Error writing to screen: {:?}", _0)]
-    DisplayWriteError(DisplayError),
+    WriteError(DisplayError),
 }
 
 type R<T> = Result<T, ScreenWriterError>;
@@ -52,7 +52,7 @@ where
             }
         };
 
-        return Ok(Self { display: ssd1306 });
+        Ok(Self { display: ssd1306 })
     }
 
     pub fn write_text(
@@ -68,7 +68,7 @@ where
 
         let text = Text::new(text, pos, text_style);
         text.draw(&mut self.display)
-            .map_err(|e| ScreenWriterError::DisplayWriteError(e))?;
+            .map_err(ScreenWriterError::DisplayWriteError)?;
         Ok(())
     }
 
@@ -76,7 +76,7 @@ where
         let line =
             Line::new(start, end).into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1));
         line.draw(&mut self.display)
-            .map_err(|e| ScreenWriterError::DisplayWriteError(e))?;
+            .map_err(ScreenWriterError::DisplayWriteError)?;
         Ok(())
     }
 
@@ -84,7 +84,7 @@ where
         let rect =
             Rectangle::new(top_left, size).into_styled(PrimitiveStyle::with_fill(BinaryColor::On));
         rect.draw(&mut self.display)
-            .map_err(|e| ScreenWriterError::DisplayWriteError(e))?;
+            .map_err(ScreenWriterError::DisplayWriteError)?;
         Ok(())
     }
 
@@ -92,7 +92,7 @@ where
         let arc = Arc::new(top_left, size, (offset as f32 * 36.0).deg(), 245.0.deg())
             .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1));
         arc.draw(&mut self.display)
-            .map_err(|e| ScreenWriterError::DisplayWriteError(e))?;
+            .map_err(ScreenWriterError::DisplayWriteError)?;
 
         Ok(())
     }

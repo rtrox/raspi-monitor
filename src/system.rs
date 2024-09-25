@@ -21,10 +21,10 @@ impl SysInfo {
         let networks = Networks::new_with_refreshed_list();
         let disks = Disks::new_with_refreshed_list();
         Self {
-            sys: sys,
-            components: components,
-            networks: networks,
-            disks: disks,
+            sys,
+            components,
+            networks,
+            disks,
         }
     }
 
@@ -51,7 +51,7 @@ impl SysInfo {
                 }
             }
         }
-        return IpAddr::V4(Ipv4Addr::new(0, 0, 0, 0));
+        IpAddr::V4(Ipv4Addr::new(0, 0, 0, 0))
     }
 
     pub fn uptime() -> String {

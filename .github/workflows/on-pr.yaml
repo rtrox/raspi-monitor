@@ -17,4 +17,4 @@ jobs:
     uses: ./.github/workflows/docker-image.yaml
     with:
       push: true
-      suffix: -devel
+      # suffix: -devel

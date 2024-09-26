@@ -182,7 +182,7 @@ fn render_system_monitor(
 
     writer.write_text(
         format!("C: {:>2.0}°C", sys.cpu_temp()).as_str(),
-        Point::new(84, 58),
+        Point::new(85, 58),
         &FONT_6X10,
     )?;
     Ok(())

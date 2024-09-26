@@ -25,6 +25,8 @@ struct Args {
     i2c_bus: u8,
     #[arg(short = 'a', long, value_parser = maybe_hex::<u16>, default_value = "0x3C")]
     i2c_address: u16,
+    #[arg(short, long, default_value = "/")]
+    root_mount_point: String,
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -58,8 +60,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
         writer.clear()?;
         let res = match page {
-            0 => render_page_1(&sys, &mut writer, frame),
-            1 => render_page_2(&sys, &mut writer, frame),
+            0 => render_page_1(&sys, &mut writer, args.root_mount_point.as_str(), frame),
+            1 => render_page_2(&sys, &mut writer, args.root_mount_point.as_str(), frame),
             _ => unreachable!(),
         };
         match res {
@@ -87,6 +89,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 fn render_page_1(
     sys: &system::SysInfo,
     writer: &mut ScreenWriter<I2CInterface<I2c>, DisplaySize128x64>,
+    root_mount_point: &str,
     frame: u16,
 ) -> anyhow::Result<()> {
     // Hostname
@@ -100,13 +103,14 @@ fn render_page_1(
     )?;
     writer.write_line(Point::new(0, 12), Point::new(128, 12))?;
 
-    render_system_monitor(sys, writer)?;
+    render_system_monitor(sys, writer, root_mount_point)?;
     Ok(())
 }
 
 fn render_page_2(
     sys: &system::SysInfo,
     writer: &mut ScreenWriter<I2CInterface<I2c>, DisplaySize128x64>,
+    root_mount_point: &str,
     frame: u16,
 ) -> anyhow::Result<()> {
     // Hostname
@@ -120,13 +124,14 @@ fn render_page_2(
     )?;
     writer.write_line(Point::new(0, 12), Point::new(128, 12))?;
 
-    render_system_monitor(sys, writer)?;
+    render_system_monitor(sys, writer, root_mount_point)?;
     Ok(())
 }
 
 fn render_system_monitor(
     sys: &system::SysInfo,
     writer: &mut ScreenWriter<I2CInterface<I2c>, DisplaySize128x64>,
+    root_mount_point: &str,
 ) -> anyhow::Result<()> {
     render_bar_graph(
         writer,
@@ -146,7 +151,7 @@ fn render_system_monitor(
         100.0,
     )?;
 
-    match sys.root_disk_usage() {
+    match sys.root_disk_usage(root_mount_point) {
         Some(usage) => {
             render_bar_graph(
                 writer,

@@ -1,11 +1,10 @@
 use std::net::{IpAddr, Ipv4Addr};
 
 use sysinfo::{Components, Disks, MemoryRefreshKind, Networks, System};
+use tracing::info;
 
 static RASPI_CPU_TEMP: &str = "cpu_thermal temp1";
 // pub const RASPI_ADC_TEMP: &str = "rp1_adc temp1";
-
-static ROOT_MOUNT_POINT: &str = "/";
 
 pub struct SysInfo {
     sys: sysinfo::System,
@@ -45,6 +44,7 @@ impl SysInfo {
         for (iface_name, net) in self.networks.iter() {
             if iface_name == "eth0" || iface_name == "wlan0" {
                 for ip in net.ip_networks() {
+                    info!("{}: {:?}", iface_name, ip);
                     if ip.addr.is_ipv4() {
                         return ip.addr;
                     }
@@ -88,9 +88,9 @@ impl SysInfo {
         0.0
     }
 
-    pub fn root_disk_usage(&self) -> Option<f32> {
+    pub fn root_disk_usage(&self, root_mount_point: &str) -> Option<f32> {
         for disk in self.disks.iter() {
-            if disk.mount_point().to_str().unwrap_or("") == ROOT_MOUNT_POINT {
+            if disk.mount_point().to_str().unwrap_or("") == root_mount_point {
                 return Some(
                     (disk.total_space() - disk.available_space()) as f32
                         / disk.total_space() as f32

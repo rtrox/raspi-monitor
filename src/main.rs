@@ -167,7 +167,7 @@ fn render_system_monitor(
                 writer,
                 Point::new(0, 39),
                 "Disk",
-                |_| "N/A".to_string(),
+                |_| " N/A".to_string(),
                 0.0,
                 100.0,
             )?;

@@ -17,13 +17,13 @@ pub struct ScreenWriter<DI, DS: DisplaySize> {
 #[derive(Error, Debug)]
 pub enum ScreenWriterError {
     #[error("Display initialization error: {:?}", _0)]
-    InitError(DisplayError),
+    Init(DisplayError),
     #[error("Error clearing display: {:?}", _0)]
-    ClearError(DisplayError),
+    Clear(DisplayError),
     #[error("Error flushing display: {:?}", _0)]
-    FlushError(DisplayError),
+    Flush(DisplayError),
     #[error("Error writing to screen: {:?}", _0)]
-    WriteError(DisplayError),
+    Write(DisplayError),
 }
 
 type R<T> = Result<T, ScreenWriterError>;
@@ -39,10 +39,10 @@ where
         rotation: DisplayRotation,
     ) -> Result<Self, ScreenWriterError> {
         let mut ssd1306 = Ssd1306::new(i2c_interface, size, rotation).into_buffered_graphics_mode();
-        ssd1306.init().map_err(ScreenWriterError::InitError)?;
+        ssd1306.init().map_err(ScreenWriterError::Init)?;
         ssd1306
             .clear(BinaryColor::Off)
-            .map_err(ScreenWriterError::ClearError)?;
+            .map_err(ScreenWriterError::Clear)?;
 
         Ok(Self { display: ssd1306 })
     }
@@ -60,7 +60,7 @@ where
 
         let text = Text::new(text, pos, text_style);
         text.draw(&mut self.display)
-            .map_err(ScreenWriterError::WriteError)?;
+            .map_err(ScreenWriterError::Write)?;
         Ok(())
     }
 
@@ -68,7 +68,7 @@ where
         let line =
             Line::new(start, end).into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1));
         line.draw(&mut self.display)
-            .map_err(ScreenWriterError::WriteError)?;
+            .map_err(ScreenWriterError::Write)?;
         Ok(())
     }
 
@@ -76,7 +76,7 @@ where
         let rect =
             Rectangle::new(top_left, size).into_styled(PrimitiveStyle::with_fill(BinaryColor::On));
         rect.draw(&mut self.display)
-            .map_err(ScreenWriterError::WriteError)?;
+            .map_err(ScreenWriterError::Write)?;
         Ok(())
     }
 
@@ -84,18 +84,18 @@ where
         let arc = Arc::new(top_left, size, (offset as f32 * 36.0).deg(), 245.0.deg())
             .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1));
         arc.draw(&mut self.display)
-            .map_err(ScreenWriterError::WriteError)?;
+            .map_err(ScreenWriterError::Write)?;
 
         Ok(())
     }
 
     pub fn flush(&mut self) -> R<()> {
-        self.display.flush().map_err(ScreenWriterError::FlushError)
+        self.display.flush().map_err(ScreenWriterError::Flush)
     }
 
     pub fn clear(&mut self) -> R<()> {
         self.display
             .clear(BinaryColor::Off)
-            .map_err(ScreenWriterError::ClearError)
+            .map_err(ScreenWriterError::Clear)
     }
 }

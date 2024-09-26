@@ -1,5 +1,6 @@
 use clap::Parser;
 use clap_num::maybe_hex;
+use tracing::info;
 
 use std::time::Duration;
 
@@ -43,6 +44,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut writer = ScreenWriter::new(interface, DisplaySize128x64, DisplayRotation::Rotate0)?;
     let mut sys = system::SysInfo::new();
 
+    info!("Starting Raspi-Monitor");
     let mut frame: u16 = 0;
     let mut cycle = 0;
     let mut page = 0;

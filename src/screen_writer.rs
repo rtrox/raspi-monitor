@@ -39,18 +39,10 @@ where
         rotation: DisplayRotation,
     ) -> Result<Self, ScreenWriterError> {
         let mut ssd1306 = Ssd1306::new(i2c_interface, size, rotation).into_buffered_graphics_mode();
-        match ssd1306.init() {
-            Ok(_) => {}
-            Err(e) => {
-                return Err(ScreenWriterError::DisplayInitError(e));
-            }
-        };
-        match ssd1306.clear(BinaryColor::Off) {
-            Ok(_) => {}
-            Err(e) => {
-                return Err(ScreenWriterError::DisplayClearError(e));
-            }
-        };
+        ssd1306.init().map_err(ScreenWriterError::InitError)?;
+        ssd1306
+            .clear(BinaryColor::Off)
+            .map_err(ScreenWriterError::ClearError)?;
 
         Ok(Self { display: ssd1306 })
     }
@@ -68,7 +60,7 @@ where
 
         let text = Text::new(text, pos, text_style);
         text.draw(&mut self.display)
-            .map_err(ScreenWriterError::DisplayWriteError)?;
+            .map_err(ScreenWriterError::WriteError)?;
         Ok(())
     }
 
@@ -76,7 +68,7 @@ where
         let line =
             Line::new(start, end).into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1));
         line.draw(&mut self.display)
-            .map_err(ScreenWriterError::DisplayWriteError)?;
+            .map_err(ScreenWriterError::WriteError)?;
         Ok(())
     }
 
@@ -84,7 +76,7 @@ where
         let rect =
             Rectangle::new(top_left, size).into_styled(PrimitiveStyle::with_fill(BinaryColor::On));
         rect.draw(&mut self.display)
-            .map_err(ScreenWriterError::DisplayWriteError)?;
+            .map_err(ScreenWriterError::WriteError)?;
         Ok(())
     }
 
@@ -92,22 +84,18 @@ where
         let arc = Arc::new(top_left, size, (offset as f32 * 36.0).deg(), 245.0.deg())
             .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1));
         arc.draw(&mut self.display)
-            .map_err(ScreenWriterError::DisplayWriteError)?;
+            .map_err(ScreenWriterError::WriteError)?;
 
         Ok(())
     }
 
     pub fn flush(&mut self) -> R<()> {
-        match self.display.flush() {
-            Ok(()) => Ok(()),
-            Err(e) => Err(ScreenWriterError::DisplayFlushError(e)),
-        }
+        self.display.flush().map_err(ScreenWriterError::FlushError)
     }
 
     pub fn clear(&mut self) -> R<()> {
-        match self.display.clear(BinaryColor::Off) {
-            Ok(()) => Ok(()),
-            Err(e) => Err(ScreenWriterError::DisplayClearError(e)),
-        }
+        self.display
+            .clear(BinaryColor::Off)
+            .map_err(ScreenWriterError::ClearError)
     }
 }

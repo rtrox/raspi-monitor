@@ -1,4 +1,4 @@
-FROM docker.io/library/rust:1.81-alpine as builder
+FROM docker.io/library/rust:1.84-alpine as builder
 ARG REVISION
 ARG VERSION
 

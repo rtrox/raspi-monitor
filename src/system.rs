@@ -42,7 +42,10 @@ impl SysInfo {
 
     pub fn ip_addr(&self) -> IpAddr {
         for (iface_name, net) in self.networks.iter() {
-            if iface_name == "eth0" || iface_name == "wlan0" {
+            if ["eth", "wlan", "en", "wl"]
+                .iter()
+                .any(|&x| iface_name.starts_with(x))
+            {
                 for ip in net.ip_networks() {
                     info!("{}: {:?}", iface_name, ip);
                     if ip.addr.is_ipv4() {

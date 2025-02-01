@@ -84,7 +84,7 @@ jobs:
         run: |
           mkdir -p /tmp/digests
           digest="${{ steps.build.outputs.digest }}"
-          echo DIGEST_NAME="$(echo {{ matrix.platform }} | sed 's:/:-:g')" >> "$GITHUB_ENV"
+          echo DIGEST_NAME="$(echo ${{ matrix.platform }} | sed 's:/:-:g')" >> "$GITHUB_ENV"
           touch "/tmp/digests/${digest#sha256:}"
 
       - name: Upload Digest
